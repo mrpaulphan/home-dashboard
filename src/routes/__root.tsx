@@ -68,7 +68,7 @@ function RootDocument() {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-slate-50 text-slate-900">
+      <body className="min-h-screen bg-background text-foreground">
         <PwaShell />
         <Outlet />
         <MobileNav />

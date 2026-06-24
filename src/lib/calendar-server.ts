@@ -1,3 +1,7 @@
+import { UPCOMING_EVENTS_DAYS } from '#/lib/calendar'
+
+export { UPCOMING_EVENTS_DAYS } from '#/lib/calendar'
+
 export type CalendarEvent = {
   id: string
   title: string
@@ -100,7 +104,9 @@ async function fetchFromGoogleApi(days: number) {
     .filter((event): event is CalendarEvent => event !== null)
 }
 
-export async function fetchUpcomingCalendarEvents(days = 30) {
+export async function fetchUpcomingCalendarEvents(
+  days = UPCOMING_EVENTS_DAYS,
+) {
   const icalUrl = getIcalUrl()
 
   if (icalUrl) {

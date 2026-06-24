@@ -1,7 +1,20 @@
-import type { CalendarEvent } from '#/lib/calendar-server'
+import {
+  UPCOMING_EVENTS_DAYS,
+  type CalendarEvent,
+} from '#/lib/calendar'
 
 function unfoldIcs(text: string) {
   return text.replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '')
+}
+
+function unescapeIcsText(value: string) {
+  return value.replace(/\\([\\;,nN])/g, (_match, char: string) => {
+    if (char === 'n' || char === 'N') {
+      return '\n'
+    }
+
+    return char
+  })
 }
 
 function parseIcsDate(value: string, params = '') {
@@ -77,22 +90,26 @@ function parseEventBlock(block: string): CalendarEvent | null {
 
   return {
     id: uid,
-    title: summary,
-    description: fields.get('DESCRIPTION') ?? null,
+    title: unescapeIcsText(summary),
+    description: fields.get('DESCRIPTION')
+      ? unescapeIcsText(fields.get('DESCRIPTION')!)
+      : null,
     start: start.allDay ? start.iso : start.iso,
     end: end.allDay ? end.iso : end.iso,
     allDay: start.allDay,
-    location: fields.get('LOCATION') ?? null,
+    location: fields.get('LOCATION')
+      ? unescapeIcsText(fields.get('LOCATION')!)
+      : null,
   }
 }
 
-export function parseIcsEvents(text: string, days = 30) {
+export function parseIcsEvents(text: string, days = UPCOMING_EVENTS_DAYS) {
   const unfolded = unfoldIcs(text)
   const blocks = unfolded.split('BEGIN:VEVENT').slice(1)
   const windowStart = new Date()
   windowStart.setHours(0, 0, 0, 0)
-  const max = new Date()
-  max.setDate(max.getDate() + days)
+  const windowEnd = new Date()
+  windowEnd.setDate(windowEnd.getDate() + days)
 
   return blocks
     .map((block) => parseEventBlock(block.split('END:VEVENT')[0] ?? block))
@@ -101,7 +118,7 @@ export function parseIcsEvents(text: string, days = 30) {
       const start = event.allDay
         ? new Date(`${event.start}T00:00:00`)
         : new Date(event.start)
-      return start >= windowStart && start <= max
+      return start >= windowStart && start <= windowEnd
     })
     .sort(
       (left, right) =>
@@ -109,7 +126,10 @@ export function parseIcsEvents(text: string, days = 30) {
     )
 }
 
-export async function fetchIcalEvents(url: string, days = 30) {
+export async function fetchIcalEvents(
+  url: string,
+  days = UPCOMING_EVENTS_DAYS,
+) {
   const response = await fetch(url)
 
   if (!response.ok) {

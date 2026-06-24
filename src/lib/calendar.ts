@@ -2,6 +2,9 @@ import type { CalendarEvent } from '#/lib/calendar-server'
 
 export type { CalendarEvent }
 
+/** Default upcoming window: ~3 months */
+export const UPCOMING_EVENTS_DAYS = 90
+
 export function parseEventDate(value: string) {
   if (value.length === 10) {
     const [year, month, day] = value.split('-').map(Number)
@@ -16,6 +19,11 @@ export function getLocalDayKey(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+export function getGoogleMapsUrl(location: string) {
+  const query = location.replace(/\s*\n+\s*/g, ', ').trim()
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
 
 export function getEventDayKey(value: string) {
@@ -34,6 +42,45 @@ export function formatEventTime(event: CalendarEvent) {
   }).format(parseEventDate(event.start))
 }
 
+export function formatEventSchedule(event: CalendarEvent) {
+  const start = parseEventDate(event.start)
+  const end = parseEventDate(event.end)
+
+  if (event.allDay) {
+    const dateLabel = new Intl.DateTimeFormat(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    }).format(start)
+
+    if (getEventDayKey(event.start) === getEventDayKey(event.end)) {
+      return `${dateLabel} · All day`
+    }
+
+    const endLabel = new Intl.DateTimeFormat(undefined, {
+      month: 'long',
+      day: 'numeric',
+    }).format(end)
+
+    return `${dateLabel} – ${endLabel} · All day`
+  }
+
+  const startLabel = new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(start)
+
+  const endLabel = new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(end)
+
+  return `${startLabel} – ${endLabel}`
+}
+
 export function formatSectionDate(dayKey: string) {
   const [year, month, day] = dayKey.split('-').map(Number)
   const date = new Date(year, month - 1, day)
@@ -42,19 +89,28 @@ export function formatSectionDate(dayKey: string) {
   tomorrow.setDate(tomorrow.getDate() + 1)
   const tomorrowKey = getLocalDayKey(tomorrow)
 
+  const shortDate = new Intl.DateTimeFormat(undefined, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date)
+
+  const fullDate = new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date)
+
   if (dayKey === todayKey) {
-    return 'Today'
+    return `Today, ${shortDate}`
   }
 
   if (dayKey === tomorrowKey) {
-    return 'Tomorrow'
+    return `Tomorrow, ${shortDate}`
   }
 
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  }).format(date)
+  return fullDate
 }
 
 export function groupEventsByDay(events: CalendarEvent[]) {
@@ -118,4 +174,24 @@ export function eventsForDay(events: CalendarEvent[], day: Date) {
   )
 
   return events.filter((event) => getEventDayKey(event.start) === dayKey)
+}
+
+export function filterEvents(events: CalendarEvent[], query: string) {
+  const normalized = query.trim().toLowerCase()
+
+  if (!normalized) {
+    return events
+  }
+
+  return events.filter((event) => {
+    const haystack = [
+      event.title,
+      event.description ?? '',
+      event.location ?? '',
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return haystack.includes(normalized)
+  })
 }

@@ -9,16 +9,16 @@ const navItems = [
     testId: 'nav-home-link',
   },
   {
-    to: '/packages',
-    label: 'Packages',
-    icon: Package,
-    testId: 'nav-packages-link',
-  },
-  {
     to: '/events',
     label: 'Events',
     icon: CalendarDays,
     testId: 'nav-events-link',
+  },
+  {
+    to: '/packages',
+    label: 'Packages',
+    icon: Package,
+    testId: 'nav-packages-link',
   },
 ] as const
 
@@ -29,7 +29,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur"
       data-testid="mobile-nav-container"
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
@@ -46,13 +46,17 @@ export function MobileNav() {
               key={item.to}
               to={item.to}
               className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-slate-500 hover:text-slate-800'
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
               data-testid={item.testId}
             >
-              <Icon className="h-5 w-5" aria-hidden="true" />
+              <span
+                className={`rounded-xl p-1.5 transition-colors ${
+                  isActive ? 'bg-primary/15 text-primary' : ''
+                }`}
+              >
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
               <span>{item.label}</span>
             </Link>
           )

@@ -5,10 +5,11 @@ export const Route = createFileRoute('/api/calendar/events')({
     handlers: {
       GET: async () => {
         try {
-          const { fetchUpcomingCalendarEvents } = await import(
-            '#/lib/calendar-server'
-          )
-          const events = await fetchUpcomingCalendarEvents(30)
+          const {
+            fetchUpcomingCalendarEvents,
+            UPCOMING_EVENTS_DAYS,
+          } = await import('#/lib/calendar-server')
+          const events = await fetchUpcomingCalendarEvents(UPCOMING_EVENTS_DAYS)
 
           return Response.json({ events })
         } catch (error) {

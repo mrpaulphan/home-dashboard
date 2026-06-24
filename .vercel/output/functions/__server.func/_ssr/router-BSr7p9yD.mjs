@@ -1,7 +1,7 @@
 import { __toESM } from "../_runtime.mjs";
 import { HeadContent, Link, Outlet, Scripts, createFileRoute, createRootRoute, createRouter, lazyRouteComponent, require_jsx_runtime, require_react, useRouterState } from "../_libs/@tanstack/react-router+[...].mjs";
 import { CalendarDays, House, Package } from "../_libs/lucide-react.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-Bp5xVcuu.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BSr7p9yD.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var SW_PATH = "/sw.js";
@@ -217,22 +217,22 @@ var navItems = [
 		testId: "nav-home-link"
 	},
 	{
-		to: "/packages",
-		label: "Packages",
-		icon: Package,
-		testId: "nav-packages-link"
-	},
-	{
 		to: "/events",
 		label: "Events",
 		icon: CalendarDays,
 		testId: "nav-events-link"
+	},
+	{
+		to: "/packages",
+		label: "Packages",
+		icon: Package,
+		testId: "nav-packages-link"
 	}
 ];
 function MobileNav() {
 	const pathname = useRouterState({ select: (state) => state.location.pathname });
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
-		className: "fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur",
+		className: "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur",
 		"data-testid": "mobile-nav-container",
 		style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -242,18 +242,21 @@ function MobileNav() {
 				const Icon = item.icon;
 				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 					to: item.to,
-					className: `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs font-medium transition-colors ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-500 hover:text-slate-800"}`,
+					className: `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs font-medium transition-colors ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`,
 					"data-testid": item.testId,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
-						className: "h-5 w-5",
-						"aria-hidden": "true"
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: `rounded-xl p-1.5 transition-colors ${isActive ? "bg-primary/15 text-primary" : ""}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
+							className: "h-5 w-5",
+							"aria-hidden": "true"
+						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.label })]
 				}, item.to);
 			})
 		})
 	});
 }
-var styles_default = "/assets/styles-3O9PbM5L.css";
+var styles_default = "/assets/styles-8fV2DLMz.css";
 var Route$6 = createRootRoute({
 	head: () => ({
 		meta: [
@@ -309,7 +312,7 @@ function RootDocument() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("html", {
 		lang: "en",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("head", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", {
-			className: "min-h-screen bg-slate-50 text-slate-900",
+			className: "min-h-screen bg-background text-foreground",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PwaShell, {}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {}),
@@ -319,11 +322,11 @@ function RootDocument() {
 		})]
 	});
 }
-var $$splitComponentImporter$2 = () => import("./packages-n-4KfqKE.mjs");
+var $$splitComponentImporter$2 = () => import("./packages-B6vhLiqY.mjs");
 var Route$5 = createFileRoute("/packages")({ component: lazyRouteComponent($$splitComponentImporter$2, "component") });
-var $$splitComponentImporter$1 = () => import("./events-0IjzmEMW.mjs");
+var $$splitComponentImporter$1 = () => import("./events-NyPHaR8z.mjs");
 var Route$4 = createFileRoute("/events")({ component: lazyRouteComponent($$splitComponentImporter$1, "component") });
-var $$splitComponentImporter = () => import("./routes-Ctv7VZe6.mjs");
+var $$splitComponentImporter = () => import("./routes-CWZgKzYz.mjs");
 var Route$3 = createFileRoute("/")({ component: lazyRouteComponent($$splitComponentImporter, "component") });
 var Route$2 = createFileRoute("/api/subscribe")({ server: { handlers: { POST: async ({ request }) => {
 	try {
@@ -386,8 +389,8 @@ var Route$1 = createFileRoute("/api/webhook/packages")({ server: { handlers: { P
 } } } });
 var Route = createFileRoute("/api/calendar/events")({ server: { handlers: { GET: async () => {
 	try {
-		const { fetchUpcomingCalendarEvents } = await import("./calendar-server-CFvYTagr.mjs");
-		const events = await fetchUpcomingCalendarEvents(30);
+		const { fetchUpcomingCalendarEvents, UPCOMING_EVENTS_DAYS } = await import("./calendar-server-BzBDDbhO.mjs");
+		const events = await fetchUpcomingCalendarEvents(UPCOMING_EVENTS_DAYS);
 		return Response.json({ events });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Failed to load calendar events.";

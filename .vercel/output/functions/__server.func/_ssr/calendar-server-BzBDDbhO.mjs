@@ -1,4 +1,5 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/calendar-server-CFvYTagr.js
+import { UPCOMING_EVENTS_DAYS } from "./calendar-Bam_qKKK.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/calendar-server-BzBDDbhO.js
 function getIcalUrl() {
 	return process.env.GOOGLE_CALENDAR_ICAL_URL || process.env.VITE_GOOGLE_CALENDAR_ICAL_URL || null;
 }
@@ -45,13 +46,13 @@ async function fetchFromGoogleApi(days) {
 	if (!response.ok) throw new Error(data.error?.message ?? "Failed to load calendar events.");
 	return (data.items ?? []).map(mapGoogleEvent).filter((event) => event !== null);
 }
-async function fetchUpcomingCalendarEvents(days = 30) {
+async function fetchUpcomingCalendarEvents(days = 90) {
 	const icalUrl = getIcalUrl();
 	if (icalUrl) {
-		const { fetchIcalEvents } = await import("./calendar-ical-AwhtylK6.mjs");
+		const { fetchIcalEvents } = await import("./calendar-ical-1b0_X5wl.mjs");
 		return fetchIcalEvents(icalUrl, days);
 	}
 	return fetchFromGoogleApi(days);
 }
 //#endregion
-export { fetchUpcomingCalendarEvents };
+export { UPCOMING_EVENTS_DAYS, fetchUpcomingCalendarEvents };

@@ -19,11 +19,11 @@ export function PageShell({
       data-testid={testId}
     >
       <header className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {title}
         </h1>
         {subtitle ? (
-          <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         ) : null}
       </header>
       {children}

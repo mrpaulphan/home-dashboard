@@ -1,9 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
 import { EventCalendar } from '#/components/EventCalendar'
 import { EventList } from '#/components/EventList'
+import { EventSearch } from '#/components/EventSearch'
 import { PageShell } from '#/components/PageShell'
 import { useCalendarEvents } from '#/hooks/useCalendarEvents'
+import { filterEvents } from '#/lib/calendar'
+import { createFileRoute } from '@tanstack/react-router'
+import { useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/events')({
   component: EventsPage,
@@ -14,20 +16,33 @@ type EventsView = 'list' | 'calendar'
 function EventsPage() {
   const { events, loading, error } = useCalendarEvents()
   const [view, setView] = useState<EventsView>('list')
+  const [query, setQuery] = useState('')
+
+  const filteredEvents = useMemo(
+    () => filterEvents(events, query),
+    [events, query],
+  )
 
   return (
     <PageShell
       title="Events"
-      subtitle="Shared calendar for the next 30 days."
       testId="events-page-container"
     >
-      <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+      <div className="mb-4">
+        <EventSearch
+          value={query}
+          resultCount={filteredEvents.length}
+          onChange={setQuery}
+        />
+      </div>
+
+      <div className="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
         <button
           type="button"
-          className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+          className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             view === 'list'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-600'
+              ? 'bg-background text-primary shadow-sm ring-1 ring-primary/25'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
           data-testid="events-viewList-button"
           onClick={() => setView('list')}
@@ -36,10 +51,10 @@ function EventsPage() {
         </button>
         <button
           type="button"
-          className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+          className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             view === 'calendar'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-600'
+              ? 'bg-background text-primary shadow-sm ring-1 ring-primary/25'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
           data-testid="events-viewCalendar-button"
           onClick={() => setView('calendar')}
@@ -49,22 +64,31 @@ function EventsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500" data-testid="events-loading-text">
+        <p className="text-sm text-muted-foreground" data-testid="events-loading-text">
           Loading events…
         </p>
       ) : null}
 
       {!loading && error ? (
-        <p className="mb-4 text-sm text-amber-700" data-testid="events-error-text">
+        <p className="mb-4 text-sm text-destructive" data-testid="events-error-text">
           {error}
         </p>
       ) : null}
 
       {!loading && view === 'list' ? (
-        <EventList events={events} />
+        <EventList
+          events={filteredEvents}
+          emptyMessage={
+            query
+              ? `No events match "${query}".`
+              : 'No upcoming events in the next 3 months.'
+          }
+        />
       ) : null}
 
-      {!loading && view === 'calendar' ? <EventCalendar events={events} /> : null}
+      {!loading && view === 'calendar' ? (
+        <EventCalendar events={filteredEvents} searchQuery={query} />
+      ) : null}
     </PageShell>
   )
 }

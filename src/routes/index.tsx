@@ -21,18 +21,18 @@ function Home() {
     >
       <div className="space-y-4">
         <section
-          className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white shadow-sm"
+          className="rounded-lg border border-border bg-card p-5 shadow-sm"
           data-testid="home-summary-card"
         >
-          <p className="text-sm text-blue-100">This week</p>
+          <p className="text-sm text-muted-foreground">This week</p>
           <div className="mt-3 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-white/10 p-3">
-              <p className="text-2xl font-bold">{packages.length}</p>
-              <p className="text-sm text-blue-100">Packages waiting</p>
+            <div className="rounded-md bg-muted p-3">
+              <p className="text-2xl font-bold text-foreground">{packages.length}</p>
+              <p className="text-sm text-muted-foreground">Packages waiting</p>
             </div>
-            <div className="rounded-xl bg-white/10 p-3">
-              <p className="text-2xl font-bold">{events.length}</p>
-              <p className="text-sm text-blue-100">Upcoming events</p>
+            <div className="rounded-md bg-muted p-3">
+              <p className="text-2xl font-bold text-foreground">{events.length}</p>
+              <p className="text-sm text-muted-foreground">Upcoming events</p>
             </div>
           </div>
         </section>
@@ -40,14 +40,14 @@ function Home() {
         <UpcomingEventsPreview events={events} loading={loading} error={error} />
 
         <section
-          className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+          className="rounded-lg border border-border bg-card p-4 shadow-sm"
           data-testid="home-packagesPreview-card"
         >
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-blue-700" aria-hidden="true" />
+              <Package className="h-5 w-5 text-foreground" aria-hidden="true" />
               <h2
-                className="text-lg font-semibold text-slate-900"
+                className="text-lg font-semibold text-card-foreground"
                 data-testid="home-packagesPreview-header"
               >
                 Packages
@@ -55,7 +55,7 @@ function Home() {
             </div>
             <Link
               to="/packages"
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-700"
+              className="inline-flex items-center gap-1 text-sm font-medium text-foreground underline-offset-4 hover:underline"
               data-testid="home-packagesPreview-viewAll-link"
             >
               View all
@@ -64,9 +64,9 @@ function Home() {
           </div>
 
           {packagesLoading ? (
-            <p className="text-sm text-slate-500">Loading packages…</p>
+            <p className="text-sm text-muted-foreground">Loading packages…</p>
           ) : packages.length === 0 ? (
-            <p className="text-sm text-slate-600" data-testid="home-packagesPreview-empty-text">
+            <p className="text-sm text-muted-foreground" data-testid="home-packagesPreview-empty-text">
               Nothing waiting in the package room right now.
             </p>
           ) : (
@@ -74,13 +74,13 @@ function Home() {
               {packages.slice(0, 2).map((pkg) => (
                 <div
                   key={pkg.id}
-                  className="rounded-xl bg-slate-50 px-3 py-2"
+                  className="rounded-md bg-muted px-3 py-2"
                   data-testid={`home-packagesPreview-${pkg.id}-row`}
                 >
-                  <p className="font-medium text-slate-900">
+                  <p className="font-medium text-foreground">
                     {pkg.code ? `Code ${pkg.code}` : pkg.description}
                   </p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     For {pkg.recipient === 'paul' ? 'Paul' : 'Sarah'}
                   </p>
                 </div>

@@ -1,6 +1,12 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/calendar-ical-AwhtylK6.js
+//#region node_modules/.nitro/vite/services/ssr/assets/calendar-ical-1b0_X5wl.js
 function unfoldIcs(text) {
 	return text.replace(/\r\n/g, "\n").replace(/\n[ \t]/g, "");
+}
+function unescapeIcsText(value) {
+	return value.replace(/\\([\\;,nN])/g, (_match, char) => {
+		if (char === "n" || char === "N") return "\n";
+		return char;
+	});
 }
 function parseIcsDate(value, params = "") {
 	const isUtc = params.includes("TZID=UTC") || value.endsWith("Z");
@@ -50,24 +56,26 @@ function parseEventBlock(block) {
 	const end = dtEndLine ? parseIcsDate(fields.get(dtEndLine), endParams) : start;
 	return {
 		id: uid,
-		title: summary,
-		description: fields.get("DESCRIPTION") ?? null,
+		title: unescapeIcsText(summary),
+		description: fields.get("DESCRIPTION") ? unescapeIcsText(fields.get("DESCRIPTION")) : null,
 		start: start.allDay ? start.iso : start.iso,
 		end: end.allDay ? end.iso : end.iso,
 		allDay: start.allDay,
-		location: fields.get("LOCATION") ?? null
+		location: fields.get("LOCATION") ? unescapeIcsText(fields.get("LOCATION")) : null
 	};
 }
-function parseIcsEvents(text, days = 30) {
+function parseIcsEvents(text, days = 90) {
 	const blocks = unfoldIcs(text).split("BEGIN:VEVENT").slice(1);
 	const windowStart = /* @__PURE__ */ new Date();
 	windowStart.setHours(0, 0, 0, 0);
+	const windowEnd = /* @__PURE__ */ new Date();
+	windowEnd.setDate(windowEnd.getDate() + days);
 	return blocks.map((block) => parseEventBlock(block.split("END:VEVENT")[0] ?? block)).filter((event) => event !== null).filter((event) => {
 		const start = event.allDay ? /* @__PURE__ */ new Date(`${event.start}T00:00:00`) : new Date(event.start);
-		return start >= windowStart && start <= max;
+		return start >= windowStart && start <= windowEnd;
 	}).sort((left, right) => new Date(left.start).getTime() - new Date(right.start).getTime());
 }
-async function fetchIcalEvents(url, days = 30) {
+async function fetchIcalEvents(url, days = 90) {
 	const response = await fetch(url);
 	if (!response.ok) throw new Error("Failed to load calendar feed.");
 	return parseIcsEvents(await response.text(), days);
