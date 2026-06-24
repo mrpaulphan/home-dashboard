@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Family Hub">
+  <rect width="180" height="180" rx="32" fill="#2563eb"/>
+  <path fill="#ffffff" d="M44 62h124v11H44zm0 28h86v11H44zm0 28h110v11H44z"/>
+  <circle cx="126" cy="112" r="20" fill="#93c5fd"/>
+  <path fill="#1e3a8a" d="M120 112h12v17h-12z"/>
+</svg>

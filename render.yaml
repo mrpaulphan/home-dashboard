@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: family-hub
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node .output/server/index.mjs
+    envVars:
+      - key: NODE_VERSION
+        value: 24.13.1
