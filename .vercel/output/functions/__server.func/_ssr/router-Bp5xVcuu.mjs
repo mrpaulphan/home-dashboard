@@ -1,6 +1,7 @@
 import { __toESM } from "../_runtime.mjs";
-import { HeadContent, Outlet, Scripts, createFileRoute, createRootRoute, createRouter, lazyRouteComponent, require_jsx_runtime, require_react } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B6HhSAFz.js
+import { HeadContent, Link, Outlet, Scripts, createFileRoute, createRootRoute, createRouter, lazyRouteComponent, require_jsx_runtime, require_react, useRouterState } from "../_libs/@tanstack/react-router+[...].mjs";
+import { CalendarDays, House, Package } from "../_libs/lucide-react.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/router-Bp5xVcuu.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var SW_PATH = "/sw.js";
@@ -208,8 +209,52 @@ function PwaShell() {
 	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InstallPrompt, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EnableNotifications, {})] });
 }
-var styles_default = "/assets/styles-MmP5nZ5W.css";
-var Route$3 = createRootRoute({
+var navItems = [
+	{
+		to: "/",
+		label: "Home",
+		icon: House,
+		testId: "nav-home-link"
+	},
+	{
+		to: "/packages",
+		label: "Packages",
+		icon: Package,
+		testId: "nav-packages-link"
+	},
+	{
+		to: "/events",
+		label: "Events",
+		icon: CalendarDays,
+		testId: "nav-events-link"
+	}
+];
+function MobileNav() {
+	const pathname = useRouterState({ select: (state) => state.location.pathname });
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
+		className: "fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur",
+		"data-testid": "mobile-nav-container",
+		style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "mx-auto grid max-w-lg grid-cols-3 px-2 pt-2",
+			children: navItems.map((item) => {
+				const isActive = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+				const Icon = item.icon;
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+					to: item.to,
+					className: `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs font-medium transition-colors ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-500 hover:text-slate-800"}`,
+					"data-testid": item.testId,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
+						className: "h-5 w-5",
+						"aria-hidden": "true"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.label })]
+				}, item.to);
+			})
+		})
+	});
+}
+var styles_default = "/assets/styles-3O9PbM5L.css";
+var Route$6 = createRootRoute({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -268,14 +313,19 @@ function RootDocument() {
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PwaShell, {}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MobileNav, {}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})
 			]
 		})]
 	});
 }
-var $$splitComponentImporter = () => import("./routes-n0Ul8dVq.mjs");
-var Route$2 = createFileRoute("/")({ component: lazyRouteComponent($$splitComponentImporter, "component") });
-var Route$1 = createFileRoute("/api/subscribe")({ server: { handlers: { POST: async ({ request }) => {
+var $$splitComponentImporter$2 = () => import("./packages-n-4KfqKE.mjs");
+var Route$5 = createFileRoute("/packages")({ component: lazyRouteComponent($$splitComponentImporter$2, "component") });
+var $$splitComponentImporter$1 = () => import("./events-0IjzmEMW.mjs");
+var Route$4 = createFileRoute("/events")({ component: lazyRouteComponent($$splitComponentImporter$1, "component") });
+var $$splitComponentImporter = () => import("./routes-Ctv7VZe6.mjs");
+var Route$3 = createFileRoute("/")({ component: lazyRouteComponent($$splitComponentImporter, "component") });
+var Route$2 = createFileRoute("/api/subscribe")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const { savePushSubscription } = await import("./push-DPUe8WRb.mjs");
 		const body = await request.json();
@@ -300,7 +350,7 @@ function parsePackageMessage(message) {
 		description: trimmed.replace(/\b(USPS|UPS|FedEx|Amazon|DHL|OnTrac)\b/gi, "").replace(/\s+/g, " ").trim() || trimmed
 	};
 }
-var Route = createFileRoute("/api/webhook/packages")({ server: { handlers: { POST: async ({ request }) => {
+var Route$1 = createFileRoute("/api/webhook/packages")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const secret = request.headers.get("x-webhook-secret");
 		if (!secret || secret !== process.env.WEBHOOK_SECRET) return Response.json({ error: "Unauthorized." }, { status: 401 });
@@ -334,24 +384,57 @@ var Route = createFileRoute("/api/webhook/packages")({ server: { handlers: { POS
 		return Response.json({ error: message }, { status: 500 });
 	}
 } } } });
+var Route = createFileRoute("/api/calendar/events")({ server: { handlers: { GET: async () => {
+	try {
+		const { fetchUpcomingCalendarEvents } = await import("./calendar-server-CFvYTagr.mjs");
+		const events = await fetchUpcomingCalendarEvents(30);
+		return Response.json({ events });
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "Failed to load calendar events.";
+		return Response.json({
+			error: message,
+			events: []
+		}, { status: 500 });
+	}
+} } } });
+var PackagesRoute = Route$5.update({
+	id: "/packages",
+	path: "/packages",
+	getParentRoute: () => Route$6
+});
+var EventsRoute = Route$4.update({
+	id: "/events",
+	path: "/events",
+	getParentRoute: () => Route$6
+});
+var IndexRoute = Route$3.update({
+	id: "/",
+	path: "/",
+	getParentRoute: () => Route$6
+});
+var ApiSubscribeRoute = Route$2.update({
+	id: "/api/subscribe",
+	path: "/api/subscribe",
+	getParentRoute: () => Route$6
+});
+var ApiWebhookPackagesRoute = Route$1.update({
+	id: "/api/webhook/packages",
+	path: "/api/webhook/packages",
+	getParentRoute: () => Route$6
+});
 var rootRouteChildren = {
-	IndexRoute: Route$2.update({
-		id: "/",
-		path: "/",
-		getParentRoute: () => Route$3
+	IndexRoute,
+	EventsRoute,
+	PackagesRoute,
+	ApiSubscribeRoute,
+	ApiCalendarEventsRoute: Route.update({
+		id: "/api/calendar/events",
+		path: "/api/calendar/events",
+		getParentRoute: () => Route$6
 	}),
-	ApiSubscribeRoute: Route$1.update({
-		id: "/api/subscribe",
-		path: "/api/subscribe",
-		getParentRoute: () => Route$3
-	}),
-	ApiWebhookPackagesRoute: Route.update({
-		id: "/api/webhook/packages",
-		path: "/api/webhook/packages",
-		getParentRoute: () => Route$3
-	})
+	ApiWebhookPackagesRoute
 };
-var routeTree = Route$3._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$6._addFileChildren(rootRouteChildren)._addFileTypes();
 function getRouter() {
 	return createRouter({
 		routeTree,

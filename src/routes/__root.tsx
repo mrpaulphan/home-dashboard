@@ -2,6 +2,7 @@ import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-r
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { PwaShell } from '#/components/PwaShell'
+import { MobileNav } from '#/components/MobileNav'
 
 import appCss from '../styles.css?url'
 
@@ -70,6 +71,7 @@ function RootDocument() {
       <body className="min-h-screen bg-slate-50 text-slate-900">
         <PwaShell />
         <Outlet />
+        <MobileNav />
         <TanStackDevtools
           config={{
             position: 'bottom-right',

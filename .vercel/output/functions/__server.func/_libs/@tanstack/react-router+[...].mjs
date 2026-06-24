@@ -367,8 +367,163 @@ var require_react = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_production();
 }));
 //#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/routerContext.js
+//#region node_modules/@tanstack/react-router/dist/esm/utils.js
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
+/**
+* React.use if available (React 19+), undefined otherwise.
+* Use dynamic lookup to avoid Webpack compilation errors with React 18.
+*/
+var reactUse = import_react.use;
+typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
+/**
+* React hook to wrap `IntersectionObserver`.
+*
+* This hook will create an `IntersectionObserver` and observe the ref passed to it.
+*
+* When the intersection changes, the callback will be called with the `IntersectionObserverEntry`.
+*
+* @param ref - The ref to observe
+* @param intersectionObserverOptions - The options to pass to the IntersectionObserver
+* @param options - The options to pass to the hook
+* @param callback - The callback to call when the intersection changes
+* @returns The IntersectionObserver instance
+* @example
+* ```tsx
+* const MyComponent = () => {
+* const ref = React.useRef<HTMLDivElement>(null)
+* useIntersectionObserver(
+*  ref,
+*  (entry) => { doSomething(entry) },
+*  { rootMargin: '10px' },
+*  { disabled: false }
+* )
+* return <div ref={ref} />
+* ```
+*/
+function useIntersectionObserver(ref, callback, intersectionObserverOptions = {}, options = {}) {
+	import_react.useEffect(() => {
+		if (!ref.current || options.disabled || typeof IntersectionObserver !== "function") return;
+		const observer = new IntersectionObserver(([entry]) => {
+			callback(entry);
+		}, intersectionObserverOptions);
+		observer.observe(ref.current);
+		return () => {
+			observer.disconnect();
+		};
+	}, [
+		callback,
+		intersectionObserverOptions,
+		options.disabled,
+		ref
+	]);
+}
+/**
+* React hook to take a `React.ForwardedRef` and returns a `ref` that can be used on a DOM element.
+*
+* @param ref - The forwarded ref
+* @returns The inner ref returned by `useRef`
+* @example
+* ```tsx
+* const MyComponent = React.forwardRef((props, ref) => {
+*  const innerRef = useForwardedRef(ref)
+*  return <div ref={innerRef} />
+* })
+* ```
+*/
+function useForwardedRef(ref) {
+	const innerRef = import_react.useRef(null);
+	import_react.useImperativeHandle(ref, () => innerRef.current, []);
+	return innerRef;
+}
+//#endregion
+//#region node_modules/react/cjs/react-jsx-runtime.production.js
+/**
+* @license React
+* react-jsx-runtime.production.js
+*
+* Copyright (c) Meta Platforms, Inc. and affiliates.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"), REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+	function jsxProd(type, config, maybeKey) {
+		var key = null;
+		void 0 !== maybeKey && (key = "" + maybeKey);
+		void 0 !== config.key && (key = "" + config.key);
+		if ("key" in config) {
+			maybeKey = {};
+			for (var propName in config) "key" !== propName && (maybeKey[propName] = config[propName]);
+		} else maybeKey = config;
+		config = maybeKey.ref;
+		return {
+			$$typeof: REACT_ELEMENT_TYPE,
+			type,
+			key,
+			ref: void 0 !== config ? config : null,
+			props: maybeKey
+		};
+	}
+	exports.Fragment = REACT_FRAGMENT_TYPE;
+	exports.jsx = jsxProd;
+	exports.jsxs = jsxProd;
+}));
+//#endregion
+//#region node_modules/react/jsx-runtime.js
+var require_jsx_runtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_react_jsx_runtime_production();
+}));
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/ClientOnly.js
+var import_jsx_runtime = require_jsx_runtime();
+/**
+* Render the children only after the JS has loaded client-side. Use an optional
+* fallback component if the JS is not yet loaded.
+*
+* @example
+* Render a Chart component if JS loads, renders a simple FakeChart
+* component server-side or if there is no JS. The FakeChart can have only the
+* UI without the behavior or be a loading spinner or skeleton.
+*
+* ```tsx
+* return (
+*   <ClientOnly fallback={<FakeChart />}>
+*     <Chart />
+*   </ClientOnly>
+* )
+* ```
+*/
+function ClientOnly({ children, fallback = null }) {
+	return useHydrated() ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.Fragment, { children }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.Fragment, { children: fallback });
+}
+/**
+* Return a boolean indicating if the JS has been hydrated already.
+* When doing Server-Side Rendering, the result will always be false.
+* When doing Client-Side Rendering, the result will always be false on the
+* first render and true from then on. Even if a new component renders it will
+* always start with true.
+*
+* @example
+* ```tsx
+* // Disable a button that needs JS to work.
+* let hydrated = useHydrated()
+* return (
+*   <button type="button" disabled={!hydrated} onClick={doSomethingCustom}>
+*     Click me
+*   </button>
+* )
+* ```
+* @returns True if the JS has been hydrated already, false otherwise.
+*/
+function useHydrated() {
+	return import_react.useSyncExternalStore(subscribe, () => true, () => false);
+}
+function subscribe() {
+	return () => {};
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/routerContext.js
 var routerContext = import_react.createContext(null);
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/useRouter.js
@@ -385,10 +540,6 @@ var routerContext = import_react.createContext(null);
 function useRouter(opts) {
 	return import_react.useContext(routerContext);
 }
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/matchContext.js
-var matchContext = import_react.createContext(void 0);
-var dummyMatchContext = import_react.createContext(void 0);
 //#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/utils.js
 /**
@@ -4278,327 +4429,6 @@ function useStore(atom, selector, compare = defaultCompare) {
 	return (0, import_with_selector.useSyncExternalStoreWithSelector)(subscribe, boundGetSnapshot, boundGetSnapshot, selector, compare);
 }
 //#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useMatch.js
-var dummyStore = {
-	get() {},
-	subscribe() {
-		return { unsubscribe() {} };
-	}
-};
-function useStructuralSharing(opts, router) {
-	const previousResult = import_react.useRef();
-	return (slice) => {
-		const selected = opts?.select ? opts.select(slice) : slice;
-		if (opts?.structuralSharing ?? router.options.defaultStructuralSharing) return previousResult.current = replaceEqualDeep(previousResult.current, selected);
-		return selected;
-	};
-}
-/**
-* Read and select the nearest or targeted route match.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useMatchHook
-*/
-function useMatch(opts) {
-	const router = useRouter();
-	const nearestMatchId = import_react.useContext(opts.from ? dummyMatchContext : matchContext);
-	const matchStore = opts.from ? router.stores.getRouteMatchStore(opts.from) : router.stores.matchStores.get(nearestMatchId);
-	{
-		const match = matchStore?.get();
-		if (!match) {
-			if (opts.shouldThrow ?? true) invariant();
-			return;
-		}
-		return opts.select ? opts.select(match) : match;
-	}
-	const selector = useStructuralSharing(opts, router);
-	const matchSelection = useStore(matchStore ?? dummyStore, (match) => match ? selector(match) : dummyStore);
-	if (matchSelection !== dummyStore) return matchSelection;
-	if (opts.shouldThrow ?? true) invariant();
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useLoaderData.js
-/**
-* Read and select the current route's loader data with type‑safety.
-*
-* Options:
-* - `from`/`strict`: Choose which route's data to read and strictness
-* - `select`: Map the loader data to a derived value
-* - `structuralSharing`: Enable structural sharing for stable references
-*
-* @returns The loader data (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDataHook
-*/
-function useLoaderData(opts) {
-	return useMatch({
-		from: opts.from,
-		strict: opts.strict,
-		structuralSharing: opts.structuralSharing,
-		select: (match) => {
-			return opts.select ? opts.select(match.loaderData) : match.loaderData;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useLoaderDeps.js
-/**
-* Read and select the current route's loader dependencies object.
-*
-* Options:
-* - `from`: Choose which route's loader deps to read
-* - `select`: Map the deps to a derived value
-* - `structuralSharing`: Enable structural sharing for stable references
-*
-* @returns The loader deps (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDepsHook
-*/
-function useLoaderDeps(opts) {
-	const { select, ...rest } = opts;
-	return useMatch({
-		...rest,
-		select: (match) => {
-			return select ? select(match.loaderDeps) : match.loaderDeps;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useParams.js
-/**
-* Access the current route's path parameters with type-safety.
-*
-* Options:
-* - `from`/`strict`: Specify the matched route and whether to enforce strict typing
-* - `select`: Project the params object to a derived value for memoized renders
-* - `structuralSharing`: Enable structural sharing for stable references
-* - `shouldThrow`: Throw if the route is not found in strict contexts
-*
-* @returns The params object (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useParamsHook
-*/
-function useParams(opts) {
-	return useMatch({
-		from: opts.from,
-		shouldThrow: opts.shouldThrow,
-		structuralSharing: opts.structuralSharing,
-		strict: opts.strict,
-		select: (match) => {
-			const params = opts.strict === false ? match.params : match._strictParams;
-			return opts.select ? opts.select(params) : params;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useSearch.js
-/**
-* Read and select the current route's search parameters with type-safety.
-*
-* Options:
-* - `from`/`strict`: Control which route's search is read and how strictly it's typed
-* - `select`: Map the search object to a derived value for render optimization
-* - `structuralSharing`: Enable structural sharing for stable references
-* - `shouldThrow`: Throw when the route is not found (strict contexts)
-*
-* @returns The search object (or selected value) for the matched route.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useSearchHook
-*/
-function useSearch(opts) {
-	return useMatch({
-		from: opts.from,
-		strict: opts.strict,
-		shouldThrow: opts.shouldThrow,
-		structuralSharing: opts.structuralSharing,
-		select: (match) => {
-			return opts.select ? opts.select(match.search) : match.search;
-		}
-	});
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/utils.js
-/**
-* React.use if available (React 19+), undefined otherwise.
-* Use dynamic lookup to avoid Webpack compilation errors with React 18.
-*/
-var reactUse = import_react.use;
-typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
-/**
-* React hook to wrap `IntersectionObserver`.
-*
-* This hook will create an `IntersectionObserver` and observe the ref passed to it.
-*
-* When the intersection changes, the callback will be called with the `IntersectionObserverEntry`.
-*
-* @param ref - The ref to observe
-* @param intersectionObserverOptions - The options to pass to the IntersectionObserver
-* @param options - The options to pass to the hook
-* @param callback - The callback to call when the intersection changes
-* @returns The IntersectionObserver instance
-* @example
-* ```tsx
-* const MyComponent = () => {
-* const ref = React.useRef<HTMLDivElement>(null)
-* useIntersectionObserver(
-*  ref,
-*  (entry) => { doSomething(entry) },
-*  { rootMargin: '10px' },
-*  { disabled: false }
-* )
-* return <div ref={ref} />
-* ```
-*/
-function useIntersectionObserver(ref, callback, intersectionObserverOptions = {}, options = {}) {
-	import_react.useEffect(() => {
-		if (!ref.current || options.disabled || typeof IntersectionObserver !== "function") return;
-		const observer = new IntersectionObserver(([entry]) => {
-			callback(entry);
-		}, intersectionObserverOptions);
-		observer.observe(ref.current);
-		return () => {
-			observer.disconnect();
-		};
-	}, [
-		callback,
-		intersectionObserverOptions,
-		options.disabled,
-		ref
-	]);
-}
-/**
-* React hook to take a `React.ForwardedRef` and returns a `ref` that can be used on a DOM element.
-*
-* @param ref - The forwarded ref
-* @returns The inner ref returned by `useRef`
-* @example
-* ```tsx
-* const MyComponent = React.forwardRef((props, ref) => {
-*  const innerRef = useForwardedRef(ref)
-*  return <div ref={innerRef} />
-* })
-* ```
-*/
-function useForwardedRef(ref) {
-	const innerRef = import_react.useRef(null);
-	import_react.useImperativeHandle(ref, () => innerRef.current, []);
-	return innerRef;
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useNavigate.js
-/**
-* Imperative navigation hook.
-*
-* Returns a stable `navigate(options)` function to change the current location
-* programmatically. Prefer the `Link` component for user-initiated navigation,
-* and use this hook from effects, callbacks, or handlers where imperative
-* navigation is required.
-*
-* Options:
-* - `from`: Optional route base used to resolve relative `to` paths.
-*
-* @returns A function that accepts `NavigateOptions`.
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useNavigateHook
-*/
-function useNavigate(_defaultOpts) {
-	const router = useRouter();
-	return import_react.useCallback((options) => {
-		return router.navigate({
-			...options,
-			from: options.from ?? _defaultOpts?.from
-		});
-	}, [_defaultOpts?.from, router]);
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/useRouteContext.js
-function useRouteContext(opts) {
-	return useMatch({
-		...opts,
-		select: (match) => opts.select ? opts.select(match.context) : match.context
-	});
-}
-//#endregion
-//#region node_modules/react/cjs/react-jsx-runtime.production.js
-/**
-* @license React
-* react-jsx-runtime.production.js
-*
-* Copyright (c) Meta Platforms, Inc. and affiliates.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
-var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"), REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
-	function jsxProd(type, config, maybeKey) {
-		var key = null;
-		void 0 !== maybeKey && (key = "" + maybeKey);
-		void 0 !== config.key && (key = "" + config.key);
-		if ("key" in config) {
-			maybeKey = {};
-			for (var propName in config) "key" !== propName && (maybeKey[propName] = config[propName]);
-		} else maybeKey = config;
-		config = maybeKey.ref;
-		return {
-			$$typeof: REACT_ELEMENT_TYPE,
-			type,
-			key,
-			ref: void 0 !== config ? config : null,
-			props: maybeKey
-		};
-	}
-	exports.Fragment = REACT_FRAGMENT_TYPE;
-	exports.jsx = jsxProd;
-	exports.jsxs = jsxProd;
-}));
-//#endregion
-//#region node_modules/react/jsx-runtime.js
-var require_jsx_runtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_react_jsx_runtime_production();
-}));
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/ClientOnly.js
-var import_jsx_runtime = require_jsx_runtime();
-/**
-* Render the children only after the JS has loaded client-side. Use an optional
-* fallback component if the JS is not yet loaded.
-*
-* @example
-* Render a Chart component if JS loads, renders a simple FakeChart
-* component server-side or if there is no JS. The FakeChart can have only the
-* UI without the behavior or be a loading spinner or skeleton.
-*
-* ```tsx
-* return (
-*   <ClientOnly fallback={<FakeChart />}>
-*     <Chart />
-*   </ClientOnly>
-* )
-* ```
-*/
-function ClientOnly({ children, fallback = null }) {
-	return useHydrated() ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.Fragment, { children }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.Fragment, { children: fallback });
-}
-/**
-* Return a boolean indicating if the JS has been hydrated already.
-* When doing Server-Side Rendering, the result will always be false.
-* When doing Client-Side Rendering, the result will always be false on the
-* first render and true from then on. Even if a new component renders it will
-* always start with true.
-*
-* @example
-* ```tsx
-* // Disable a button that needs JS to work.
-* let hydrated = useHydrated()
-* return (
-*   <button type="button" disabled={!hydrated} onClick={doSomethingCustom}>
-*     Click me
-*   </button>
-* )
-* ```
-* @returns True if the JS has been hydrated already, false otherwise.
-*/
-function useHydrated() {
-	return import_react.useSyncExternalStore(subscribe, () => true, () => false);
-}
-function subscribe() {
-	return () => {};
-}
-//#endregion
 //#region node_modules/react-dom/cjs/react-dom.production.js
 /**
 * @license React
@@ -5166,6 +4996,176 @@ var Link = import_react.forwardRef((props, ref) => {
 });
 function isCtrlEvent(e) {
 	return !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/matchContext.js
+var matchContext = import_react.createContext(void 0);
+var dummyMatchContext = import_react.createContext(void 0);
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useMatch.js
+var dummyStore = {
+	get() {},
+	subscribe() {
+		return { unsubscribe() {} };
+	}
+};
+function useStructuralSharing(opts, router) {
+	const previousResult = import_react.useRef();
+	return (slice) => {
+		const selected = opts?.select ? opts.select(slice) : slice;
+		if (opts?.structuralSharing ?? router.options.defaultStructuralSharing) return previousResult.current = replaceEqualDeep(previousResult.current, selected);
+		return selected;
+	};
+}
+/**
+* Read and select the nearest or targeted route match.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useMatchHook
+*/
+function useMatch(opts) {
+	const router = useRouter();
+	const nearestMatchId = import_react.useContext(opts.from ? dummyMatchContext : matchContext);
+	const matchStore = opts.from ? router.stores.getRouteMatchStore(opts.from) : router.stores.matchStores.get(nearestMatchId);
+	{
+		const match = matchStore?.get();
+		if (!match) {
+			if (opts.shouldThrow ?? true) invariant();
+			return;
+		}
+		return opts.select ? opts.select(match) : match;
+	}
+	const selector = useStructuralSharing(opts, router);
+	const matchSelection = useStore(matchStore ?? dummyStore, (match) => match ? selector(match) : dummyStore);
+	if (matchSelection !== dummyStore) return matchSelection;
+	if (opts.shouldThrow ?? true) invariant();
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useLoaderData.js
+/**
+* Read and select the current route's loader data with type‑safety.
+*
+* Options:
+* - `from`/`strict`: Choose which route's data to read and strictness
+* - `select`: Map the loader data to a derived value
+* - `structuralSharing`: Enable structural sharing for stable references
+*
+* @returns The loader data (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDataHook
+*/
+function useLoaderData(opts) {
+	return useMatch({
+		from: opts.from,
+		strict: opts.strict,
+		structuralSharing: opts.structuralSharing,
+		select: (match) => {
+			return opts.select ? opts.select(match.loaderData) : match.loaderData;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useLoaderDeps.js
+/**
+* Read and select the current route's loader dependencies object.
+*
+* Options:
+* - `from`: Choose which route's loader deps to read
+* - `select`: Map the deps to a derived value
+* - `structuralSharing`: Enable structural sharing for stable references
+*
+* @returns The loader deps (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useLoaderDepsHook
+*/
+function useLoaderDeps(opts) {
+	const { select, ...rest } = opts;
+	return useMatch({
+		...rest,
+		select: (match) => {
+			return select ? select(match.loaderDeps) : match.loaderDeps;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useParams.js
+/**
+* Access the current route's path parameters with type-safety.
+*
+* Options:
+* - `from`/`strict`: Specify the matched route and whether to enforce strict typing
+* - `select`: Project the params object to a derived value for memoized renders
+* - `structuralSharing`: Enable structural sharing for stable references
+* - `shouldThrow`: Throw if the route is not found in strict contexts
+*
+* @returns The params object (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useParamsHook
+*/
+function useParams(opts) {
+	return useMatch({
+		from: opts.from,
+		shouldThrow: opts.shouldThrow,
+		structuralSharing: opts.structuralSharing,
+		strict: opts.strict,
+		select: (match) => {
+			const params = opts.strict === false ? match.params : match._strictParams;
+			return opts.select ? opts.select(params) : params;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useSearch.js
+/**
+* Read and select the current route's search parameters with type-safety.
+*
+* Options:
+* - `from`/`strict`: Control which route's search is read and how strictly it's typed
+* - `select`: Map the search object to a derived value for render optimization
+* - `structuralSharing`: Enable structural sharing for stable references
+* - `shouldThrow`: Throw when the route is not found (strict contexts)
+*
+* @returns The search object (or selected value) for the matched route.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useSearchHook
+*/
+function useSearch(opts) {
+	return useMatch({
+		from: opts.from,
+		strict: opts.strict,
+		shouldThrow: opts.shouldThrow,
+		structuralSharing: opts.structuralSharing,
+		select: (match) => {
+			return opts.select ? opts.select(match.search) : match.search;
+		}
+	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useNavigate.js
+/**
+* Imperative navigation hook.
+*
+* Returns a stable `navigate(options)` function to change the current location
+* programmatically. Prefer the `Link` component for user-initiated navigation,
+* and use this hook from effects, callbacks, or handlers where imperative
+* navigation is required.
+*
+* Options:
+* - `from`: Optional route base used to resolve relative `to` paths.
+*
+* @returns A function that accepts `NavigateOptions`.
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useNavigateHook
+*/
+function useNavigate(_defaultOpts) {
+	const router = useRouter();
+	return import_react.useCallback((options) => {
+		return router.navigate({
+			...options,
+			from: options.from ?? _defaultOpts?.from
+		});
+	}, [_defaultOpts?.from, router]);
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useRouteContext.js
+function useRouteContext(opts) {
+	return useMatch({
+		...opts,
+		select: (match) => opts.select ? opts.select(match.context) : match.context
+	});
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/route.js
@@ -5890,6 +5890,29 @@ function RouterProvider({ router, ...rest }) {
 		...rest,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Matches, {})
 	});
+}
+//#endregion
+//#region node_modules/@tanstack/react-router/dist/esm/useRouterState.js
+/**
+* Subscribe to the router's state store with optional selection and
+* structural sharing for render optimization.
+*
+* Options:
+* - `select`: Project the full router state to a derived slice
+* - `structuralSharing`: Replace-equal semantics for stable references
+* - `router`: Read state from a specific router instance instead of context
+*
+* @returns The selected router state (or the full state by default).
+* @link https://tanstack.com/router/latest/docs/framework/react/api/router/useRouterStateHook
+*/
+function useRouterState(opts) {
+	const contextRouter = useRouter({ warn: opts?.router === void 0 });
+	const router = opts?.router || contextRouter;
+	{
+		const state = router.stores.__store.get();
+		return opts?.select ? opts.select(state) : state;
+	}
+	return useStore(router.stores.__store, useStructuralSharing(opts, router));
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/Asset.js
@@ -15027,4 +15050,4 @@ var renderRouterToStream = async ({ request, router, responseHeaders, children }
 	throw new Error("No renderToReadableStream or renderToPipeableStream found in react-dom/server. Ensure you are using a version of react-dom that supports streaming.");
 };
 //#endregion
-export { GLOBAL_TSR, HeadContent, Outlet, RouterProvider, Scripts, TSR_SCRIPT_BARRIER_ID, createFileRoute, createInlineCssPlaceholderAsset, createInlineCssStyleAsset, createLRUCache, createRootRoute, createRouter, decodePath, defineHandlerCallback, executeRewriteInput, getScriptPreloadAttrs, getStylesheetHref, invariant, isNotFound, isRedirect, isResolvedRedirect, isSsrResponse, lazyRouteComponent, normalizeSsrResponse, renderRouterToStream, replaceSsrResponse, require_jsx_runtime, require_react, resolveManifestAssetLink, resolveManifestCssLink, rootRouteId, stripSsrResponseBody };
+export { GLOBAL_TSR, HeadContent, Link, Outlet, RouterProvider, Scripts, TSR_SCRIPT_BARRIER_ID, createFileRoute, createInlineCssPlaceholderAsset, createInlineCssStyleAsset, createLRUCache, createRootRoute, createRouter, decodePath, defineHandlerCallback, executeRewriteInput, getScriptPreloadAttrs, getStylesheetHref, invariant, isNotFound, isRedirect, isResolvedRedirect, isSsrResponse, lazyRouteComponent, normalizeSsrResponse, renderRouterToStream, replaceSsrResponse, require_jsx_runtime, require_react, resolveManifestAssetLink, resolveManifestCssLink, rootRouteId, stripSsrResponseBody, useRouterState };

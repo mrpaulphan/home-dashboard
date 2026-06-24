@@ -9,10 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSubscribeRouteImport } from './routes/api/subscribe'
 import { Route as ApiWebhookPackagesRouteImport } from './routes/api/webhook.packages'
+import { Route as ApiCalendarEventsRouteImport } from './routes/api/calendar.events'
 
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -28,39 +41,89 @@ const ApiWebhookPackagesRoute = ApiWebhookPackagesRouteImport.update({
   path: '/api/webhook/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCalendarEventsRoute = ApiCalendarEventsRouteImport.update({
+  id: '/api/calendar/events',
+  path: '/api/calendar/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
+  '/packages': typeof PackagesRoute
   '/api/subscribe': typeof ApiSubscribeRoute
+  '/api/calendar/events': typeof ApiCalendarEventsRoute
   '/api/webhook/packages': typeof ApiWebhookPackagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
+  '/packages': typeof PackagesRoute
   '/api/subscribe': typeof ApiSubscribeRoute
+  '/api/calendar/events': typeof ApiCalendarEventsRoute
   '/api/webhook/packages': typeof ApiWebhookPackagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
+  '/packages': typeof PackagesRoute
   '/api/subscribe': typeof ApiSubscribeRoute
+  '/api/calendar/events': typeof ApiCalendarEventsRoute
   '/api/webhook/packages': typeof ApiWebhookPackagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/subscribe' | '/api/webhook/packages'
+  fullPaths:
+    | '/'
+    | '/events'
+    | '/packages'
+    | '/api/subscribe'
+    | '/api/calendar/events'
+    | '/api/webhook/packages'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/subscribe' | '/api/webhook/packages'
-  id: '__root__' | '/' | '/api/subscribe' | '/api/webhook/packages'
+  to:
+    | '/'
+    | '/events'
+    | '/packages'
+    | '/api/subscribe'
+    | '/api/calendar/events'
+    | '/api/webhook/packages'
+  id:
+    | '__root__'
+    | '/'
+    | '/events'
+    | '/packages'
+    | '/api/subscribe'
+    | '/api/calendar/events'
+    | '/api/webhook/packages'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EventsRoute: typeof EventsRoute
+  PackagesRoute: typeof PackagesRoute
   ApiSubscribeRoute: typeof ApiSubscribeRoute
+  ApiCalendarEventsRoute: typeof ApiCalendarEventsRoute
   ApiWebhookPackagesRoute: typeof ApiWebhookPackagesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,12 +145,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhookPackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/calendar/events': {
+      id: '/api/calendar/events'
+      path: '/api/calendar/events'
+      fullPath: '/api/calendar/events'
+      preLoaderRoute: typeof ApiCalendarEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EventsRoute: EventsRoute,
+  PackagesRoute: PackagesRoute,
   ApiSubscribeRoute: ApiSubscribeRoute,
+  ApiCalendarEventsRoute: ApiCalendarEventsRoute,
   ApiWebhookPackagesRoute: ApiWebhookPackagesRoute,
 }
 export const routeTree = rootRouteImport
