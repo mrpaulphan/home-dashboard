@@ -10,8 +10,17 @@ const config = defineConfig({
   plugins: [
     devtools(),
     nitro({
+      preset: 'vercel',
       rollupConfig: {
-        external: [/^@sentry\//, 'firebase-admin', /^firebase-admin\//],
+        external: [
+          /^@sentry\//,
+          'firebase-admin',
+          /^firebase-admin\//,
+          '@google-cloud/firestore',
+          /^@google-cloud\//,
+          'google-gax',
+          'google-auth-library',
+        ],
       },
     }),
     tailwindcss(),

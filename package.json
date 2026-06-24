@@ -12,7 +12,7 @@
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
     "build:sw": "vite build --config vite.sw.config.ts",
-    "build": "npm run build:sw && vite build",
+    "build": "npm run build:sw && vite build && node scripts/copy-server-deps.mjs",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs",
     "test": "vitest run"
